@@ -26,11 +26,12 @@ export function generateAdmitCardHTML(
   const seatNo = seatNumber(index);
 
   return `
-    <div style="width:750px; padding:28px 32px; font-family:Arial,Helvetica,sans-serif; border:2.5px solid #000; background:#fff; box-sizing:border-box;">
+    <div style="width:750px; padding:0; font-family:Arial,Helvetica,sans-serif; border:3px solid #000; background:#fff; box-sizing:border-box;">
+      <div style="padding:24px 28px 0 28px;">
       <!-- Header -->
       <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:14px;">
         <div>
-          <img src="${logoUrl}" style="height:65px; display:block;" crossorigin="anonymous" />
+          <img src="${logoUrl}" style="height:72px; display:block;" crossorigin="anonymous" />
         </div>
         <div style="text-align:right;">
           <div style="font-size:26px; font-weight:900; color:#000; letter-spacing:1px;">STUDY ROOM</div>
@@ -105,6 +106,7 @@ export function generateAdmitCardHTML(
           </td>
         </tr>
       </table>
+      </div>
     </div>
   `;
 }
@@ -127,10 +129,11 @@ export function generateResultHTML(
   const divider = `<div style="text-align:center; padding:14px 0; font-size:16px; color:#555; letter-spacing:2px;">♦———♦—◇◆◇—♦———♦</div>`;
 
   return `
-    <div style="width:750px; padding:28px 32px; font-family:Arial,Helvetica,sans-serif; border:2.5px solid #000; background:#fff; box-sizing:border-box;">
+    <div style="width:750px; padding:0; font-family:Arial,Helvetica,sans-serif; border:3px solid #000; background:#fff; box-sizing:border-box;">
+      <div style="padding:24px 28px 0 28px;">
       <!-- Header centered -->
       <div style="text-align:center; padding-bottom:8px;">
-        <img src="${logoUrl}" style="height:70px; display:inline-block;" crossorigin="anonymous" />
+        <img src="${logoUrl}" style="height:80px; display:inline-block;" crossorigin="anonymous" />
         <div style="font-size:11px; color:#333; letter-spacing:1px; margin-top:2px; font-weight:600; font-style:italic;">
           A PERFECT PLACE FOR SCIENCE
         </div>
@@ -206,6 +209,7 @@ export function generateResultHTML(
         <div style="font-size:12px; color:#333; margin-top:4px;">
           Near Akshar School, Paradise Hall Road, Gopal Chowk, Rajkot-360005
         </div>
+      </div>
       </div>
     </div>
   `;

@@ -9,7 +9,7 @@ import FileUpload from "./FileUpload";
 import DataPreview from "./DataPreview";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo.png";
 
 interface GeneratorFlowProps {
   config: GeneratorConfig;
