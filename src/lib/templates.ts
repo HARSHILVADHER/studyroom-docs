@@ -1,4 +1,4 @@
-function escapeHTML(str: string): string {
+function esc(str: string): string {
   if (!str) return '';
   return String(str)
     .replace(/&/g, '&amp;')
@@ -8,86 +8,103 @@ function escapeHTML(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
+function upper(str: string): string {
+  return esc(str).toUpperCase();
+}
+
+function seatNumber(index: number): string {
+  return `2026${String(index + 1).padStart(2, '0')}`;
+}
+
 export function generateAdmitCardHTML(
   data: Record<string, string>,
-  mapping: Record<string, string>
+  mapping: Record<string, string>,
+  index: number,
+  logoUrl: string
 ): string {
-  const get = (field: string) => escapeHTML(data[mapping[field]] || '');
-
-  const subjectsRaw = data[mapping['subjects']] || '';
-  const subjects = subjectsRaw
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const get = (field: string) => upper(data[mapping[field]] || '');
+  const seatNo = seatNumber(index);
 
   return `
-    <div style="width:750px; padding:32px; font-family:'Inter',system-ui,sans-serif; border:3px solid #D32F2F; background:#fff; box-sizing:border-box;">
-      <div style="text-align:center; border-bottom:3px solid #D32F2F; padding-bottom:16px; margin-bottom:24px;">
-        <div style="font-size:32px; font-weight:900; color:#1a1a1a; margin-bottom:2px;">
-          Study<span style="background:#D32F2F; color:#fff; padding:2px 12px; border-radius:6px; margin-left:4px;">ROOM</span>
+    <div style="width:750px; padding:28px 32px; font-family:Arial,Helvetica,sans-serif; border:2.5px solid #000; background:#fff; box-sizing:border-box;">
+      <!-- Header -->
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:14px;">
+        <div>
+          <img src="${logoUrl}" style="height:65px; display:block;" crossorigin="anonymous" />
         </div>
-        <div style="font-size:11px; color:#666; letter-spacing:2px; margin-bottom:12px; font-style:italic;">
-          Direction : Solution : Education
-        </div>
-        <div style="display:inline-block; background:#D32F2F; color:#fff; padding:8px 40px; font-size:18px; font-weight:700; letter-spacing:3px; border-radius:4px;">
-          ADMIT CARD
-        </div>
-      </div>
-
-      <div style="display:flex; justify-content:space-between; margin-bottom:24px;">
-        <table style="border-collapse:collapse;">
-          <tr><td style="padding:5px 16px 5px 0; font-weight:600; color:#333; white-space:nowrap;">Roll No:</td><td style="padding:5px 0; color:#1a1a1a;">${get('roll_no')}</td></tr>
-          <tr><td style="padding:5px 16px 5px 0; font-weight:600; color:#333;">Student Name:</td><td style="padding:5px 0; color:#1a1a1a; font-weight:600;">${get('student_name')}</td></tr>
-          <tr><td style="padding:5px 16px 5px 0; font-weight:600; color:#333;">Class:</td><td style="padding:5px 0; color:#1a1a1a;">${get('class')}</td></tr>
-          <tr><td style="padding:5px 16px 5px 0; font-weight:600; color:#333;">Date of Birth:</td><td style="padding:5px 0; color:#1a1a1a;">${get('dob')}</td></tr>
-          <tr><td style="padding:5px 16px 5px 0; font-weight:600; color:#333;">Father's Name:</td><td style="padding:5px 0; color:#1a1a1a;">${get('father_name')}</td></tr>
-          <tr><td style="padding:5px 16px 5px 0; font-weight:600; color:#333;">Exam Center:</td><td style="padding:5px 0; color:#1a1a1a;">${get('exam_center')}</td></tr>
-        </table>
-        <div style="width:120px; height:150px; border:2px solid #D32F2F; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-left:20px; border-radius:4px; overflow:hidden; background:#fafafa;">
-          ${
-            data[mapping['photo_url']]
-              ? `<img src="${escapeHTML(data[mapping['photo_url']])}" style="width:100%; height:100%; object-fit:cover;" />`
-              : '<span style="color:#bbb; font-size:11px; text-align:center;">Photo</span>'
-          }
+        <div style="text-align:right;">
+          <div style="font-size:26px; font-weight:900; color:#000; letter-spacing:1px;">STUDY ROOM</div>
+          <div style="font-size:17px; font-weight:700; color:#000; margin-top:2px;">SCHOLARSHIP TEST - 2026</div>
         </div>
       </div>
 
-      ${
-        subjects.length > 0
-          ? `
-      <div style="margin-bottom:24px;">
-        <div style="font-size:14px; font-weight:700; color:#D32F2F; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Subjects</div>
-        <table style="width:100%; border-collapse:collapse; border:1px solid #e0e0e0;">
-          <thead>
-            <tr style="background:#D32F2F; color:#fff;">
-              <th style="padding:8px 12px; text-align:left; font-size:13px; border:1px solid #c62828; width:60px;">S.No</th>
-              <th style="padding:8px 12px; text-align:left; font-size:13px; border:1px solid #c62828;">Subject</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${subjects
-              .map(
-                (s, i) => `
-              <tr style="background:${i % 2 === 0 ? '#fff' : '#fafafa'};">
-                <td style="padding:7px 12px; border:1px solid #e0e0e0; font-size:13px; text-align:center;">${i + 1}</td>
-                <td style="padding:7px 12px; border:1px solid #e0e0e0; font-size:13px;">${escapeHTML(s)}</td>
-              </tr>`
-              )
-              .join('')}
-          </tbody>
-        </table>
-      </div>`
-          : ''
-      }
+      <hr style="border:none; border-top:2px solid #000; margin:0 0 20px 0;" />
 
-      <div style="display:flex; justify-content:space-between; margin-top:48px; padding-top:20px;">
-        <div style="text-align:center;">
-          <div style="border-top:1.5px solid #333; width:170px; padding-top:8px; font-size:12px; color:#666;">Student's Signature</div>
-        </div>
-        <div style="text-align:center;">
-          <div style="border-top:1.5px solid #333; width:170px; padding-top:8px; font-size:12px; color:#666;">Principal's Signature</div>
-        </div>
-      </div>
+      <!-- Admit Card Table -->
+      <table style="width:100%; border-collapse:collapse; border:1.5px solid #000;">
+        <tr>
+          <td colspan="2" style="padding:12px 14px; border:1.5px solid #000; text-align:center; font-size:20px; font-weight:900; letter-spacing:3px;">
+            ADMIT CARD
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700; width:68%;">
+            NAME : ${get('student_name')}
+          </td>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            SEAT NO : ${seatNo}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            SCHOOL NAME : ${get('school_name')}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            MEDIUM : ${get('medium')}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            GROUP : ${get('group')}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            EXAM TIMING : 10:00 AM TO 01:00 PM
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding:10px 14px; border:1.5px solid #000; font-size:14px;">
+            <div style="font-weight:700; margin-bottom:6px;">EXAMINATION CENTER :</div>
+            <ul style="margin:0; padding-left:22px;">
+              <li style="font-size:13px;">STUDYROOM CLASSES, Near Akshar School, Gopal Chowk, Paradise Hall Road, Rajkot-360005. <span style="text-decoration:underline; color:#0066cc;">CLICK HERE FOR MAP</span></li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:36px 14px 10px; border:1.5px solid #000; font-size:13px; font-weight:600; vertical-align:bottom;">
+            Candidate Signature :
+          </td>
+          <td style="padding:36px 14px 10px; border:1.5px solid #000; font-size:13px; font-weight:600; vertical-align:bottom;">
+            Invigilator Signature :
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" style="padding:12px 14px; border:1.5px solid #000; font-size:13px;">
+            <div style="font-weight:900; margin-bottom:8px; font-size:14px;">RULES:</div>
+            <ul style="margin:0; padding-left:22px; line-height:1.7;">
+              <li>Arrive 15 minutes before the examination time</li>
+              <li>Bring your School ID proof along with this hall ticket</li>
+              <li>Electronic devices (calculator, smart watch etc.) are not allowed in the examination hall</li>
+              <li>Use Black / Blue Ball point pen only for marking responses.</li>
+              <li>Use of Whitener for correction is not permissible on the Answer Sheet.</li>
+              <li>Follow all instructions given by the invigilator</li>
+            </ul>
+          </td>
+        </tr>
+      </table>
     </div>
   `;
 }
@@ -95,93 +112,99 @@ export function generateAdmitCardHTML(
 export function generateResultHTML(
   data: Record<string, string>,
   mapping: Record<string, string>,
-  subjectColumns: string[] = []
+  index: number,
+  logoUrl: string
 ): string {
-  const get = (field: string) => escapeHTML(data[mapping[field]] || '');
+  const get = (field: string) => upper(data[mapping[field]] || '');
+  const seatNo = seatNumber(index);
+  const date = data[mapping['date']] ? upper(data[mapping['date']]) : '';
+
+  const physics = data[mapping['physics']] || '—';
+  const chemistry = data[mapping['chemistry']] || '—';
+  const mathsBiology = data[mapping['maths_biology']] || '—';
+  const total = data[mapping['total']] || '—';
+
+  const divider = `<div style="text-align:center; padding:14px 0; font-size:16px; color:#555; letter-spacing:2px;">♦———♦—◇◆◇—♦———♦</div>`;
 
   return `
-    <div style="width:750px; padding:32px; font-family:'Inter',system-ui,sans-serif; border:3px solid #D32F2F; background:#fff; box-sizing:border-box;">
-      <div style="text-align:center; border-bottom:3px solid #D32F2F; padding-bottom:16px; margin-bottom:24px;">
-        <div style="font-size:32px; font-weight:900; color:#1a1a1a; margin-bottom:2px;">
-          Study<span style="background:#D32F2F; color:#fff; padding:2px 12px; border-radius:6px; margin-left:4px;">ROOM</span>
+    <div style="width:750px; padding:28px 32px; font-family:Arial,Helvetica,sans-serif; border:2.5px solid #000; background:#fff; box-sizing:border-box;">
+      <!-- Header centered -->
+      <div style="text-align:center; padding-bottom:8px;">
+        <img src="${logoUrl}" style="height:70px; display:inline-block;" crossorigin="anonymous" />
+        <div style="font-size:11px; color:#333; letter-spacing:1px; margin-top:2px; font-weight:600; font-style:italic;">
+          A PERFECT PLACE FOR SCIENCE
         </div>
-        <div style="font-size:11px; color:#666; letter-spacing:2px; margin-bottom:12px; font-style:italic;">
-          Direction : Solution : Education
-        </div>
-        <div style="display:inline-block; background:#D32F2F; color:#fff; padding:8px 40px; font-size:18px; font-weight:700; letter-spacing:3px; border-radius:4px;">
-          EXAMINATION RESULT
+        <div style="font-size:22px; font-weight:900; color:#000; margin-top:10px; letter-spacing:1px;">
+          STUDY ROOM SCHOLARSHIP TEST - 2026
         </div>
       </div>
 
-      <table style="border-collapse:collapse; margin-bottom:24px;">
-        <tr><td style="padding:5px 16px 5px 0; font-weight:600; color:#333; white-space:nowrap;">Roll No:</td><td style="padding:5px 0; color:#1a1a1a;">${get('roll_no')}</td></tr>
-        <tr><td style="padding:5px 16px 5px 0; font-weight:600; color:#333;">Student Name:</td><td style="padding:5px 0; color:#1a1a1a; font-weight:600;">${get('student_name')}</td></tr>
-        <tr><td style="padding:5px 16px 5px 0; font-weight:600; color:#333;">Class:</td><td style="padding:5px 0; color:#1a1a1a;">${get('class')}</td></tr>
+      <!-- Student Info -->
+      <table style="width:100%; border-collapse:collapse; border:1.5px solid #000; margin-top:16px;">
+        <tr>
+          <td colspan="2" style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            STUDENT NAME: ${get('student_name')}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700; width:60%;">
+            SEAT NO: ${seatNo}
+          </td>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            DATE: ${date}
+          </td>
+        </tr>
       </table>
 
-      ${
-        subjectColumns.length > 0
-          ? `
-      <div style="margin-bottom:24px;">
-        <div style="font-size:14px; font-weight:700; color:#D32F2F; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Subject Marks</div>
-        <table style="width:100%; border-collapse:collapse; border:1px solid #e0e0e0;">
-          <thead>
-            <tr style="background:#D32F2F; color:#fff;">
-              <th style="padding:8px 12px; text-align:left; font-size:13px; border:1px solid #c62828; width:60px;">S.No</th>
-              <th style="padding:8px 12px; text-align:left; font-size:13px; border:1px solid #c62828;">Subject</th>
-              <th style="padding:8px 12px; text-align:center; font-size:13px; border:1px solid #c62828; width:120px;">Marks Obtained</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${subjectColumns
-              .map(
-                (col, i) => `
-              <tr style="background:${i % 2 === 0 ? '#fff' : '#fafafa'};">
-                <td style="padding:7px 12px; border:1px solid #e0e0e0; font-size:13px; text-align:center;">${i + 1}</td>
-                <td style="padding:7px 12px; border:1px solid #e0e0e0; font-size:13px;">${escapeHTML(col)}</td>
-                <td style="padding:7px 12px; border:1px solid #e0e0e0; font-size:13px; text-align:center; font-weight:600;">${escapeHTML(data[col] || '—')}</td>
-              </tr>`
-              )
-              .join('')}
-          </tbody>
-        </table>
-      </div>`
-          : ''
-      }
+      ${divider}
 
-      <div style="display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
-        ${
-          get('total_marks')
-            ? `<div style="padding:10px 20px; background:#fafafa; border:1px solid #e0e0e0; border-radius:8px; font-size:14px;"><span style="font-weight:600; color:#333;">Total Marks:</span> <span style="color:#1a1a1a; font-weight:700;">${get('total_marks')}</span></div>`
-            : ''
-        }
-        ${
-          get('percentage')
-            ? `<div style="padding:10px 20px; background:#fafafa; border:1px solid #e0e0e0; border-radius:8px; font-size:14px;"><span style="font-weight:600; color:#333;">Percentage:</span> <span style="color:#1a1a1a; font-weight:700;">${get('percentage')}%</span></div>`
-            : ''
-        }
-        ${
-          get('grade')
-            ? `<div style="padding:10px 20px; background:#D32F2F; color:#fff; border-radius:8px; font-size:14px; font-weight:700;">Grade: ${get('grade')}</div>`
-            : ''
-        }
-      </div>
+      <!-- Results -->
+      <table style="width:100%; border-collapse:collapse; border:1.5px solid #000;">
+        <tr>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            TOTAL CORRECT ANSWER: ${get('total_correct')}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            TOTAL INCORRECT ANSWER: ${get('total_incorrect')}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            NOT ATTEMPTED QUESTION: ${get('not_attempted')}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
+            RANK: ${get('rank')}
+          </td>
+        </tr>
+      </table>
 
-      ${
-        get('remarks')
-          ? `
-      <div style="padding:12px 16px; background:#fff5f5; border-left:4px solid #D32F2F; border-radius:0 8px 8px 0; margin-bottom:24px; font-size:14px;">
-        <span style="font-weight:600; color:#333;">Remarks:</span> <span style="color:#1a1a1a;">${get('remarks')}</span>
-      </div>`
-          : ''
-      }
+      <!-- Subject Marks -->
+      <table style="width:100%; border-collapse:collapse; border:1.5px solid #000; margin-top:16px;">
+        <tr>
+          <th style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:900; text-align:center;">PHYSICS</th>
+          <th style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:900; text-align:center;">CHEMISTRY</th>
+          <th style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:900; text-align:center;">MATHS / BIOLOGY</th>
+          <th style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:900; text-align:center;">TOTAL</th>
+        </tr>
+        <tr>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; text-align:center; font-weight:600;">${esc(physics)}</td>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; text-align:center; font-weight:600;">${esc(chemistry)}</td>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; text-align:center; font-weight:600;">${esc(mathsBiology)}</td>
+          <td style="padding:10px 14px; border:1.5px solid #000; font-size:14px; text-align:center; font-weight:600;">${esc(total)}</td>
+        </tr>
+      </table>
 
-      <div style="display:flex; justify-content:space-between; margin-top:48px; padding-top:20px;">
-        <div style="text-align:center;">
-          <div style="border-top:1.5px solid #333; width:170px; padding-top:8px; font-size:12px; color:#666;">Student's Signature</div>
-        </div>
-        <div style="text-align:center;">
-          <div style="border-top:1.5px solid #333; width:170px; padding-top:8px; font-size:12px; color:#666;">Principal's Signature</div>
+      ${divider}
+
+      <!-- Footer -->
+      <div style="text-align:center; margin-top:60px;">
+        <div style="font-weight:900; font-size:15px; color:#000;">STUDY ROOM</div>
+        <div style="font-size:12px; color:#333; margin-top:4px;">
+          Near Akshar School, Paradise Hall Road, Gopal Chowk, Rajkot-360005
         </div>
       </div>
     </div>

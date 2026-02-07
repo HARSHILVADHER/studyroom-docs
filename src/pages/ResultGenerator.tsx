@@ -5,18 +5,98 @@ import { generateResultHTML } from "@/lib/templates";
 const resultConfig: GeneratorConfig = {
   title: "Result Generator",
   description: "Upload examination data and generate result slips as PDF",
-  columns: [
-    { key: "roll_no", label: "Roll Number", required: true },
-    { key: "student_name", label: "Student Name", required: true },
-    { key: "class", label: "Class", required: true },
-    { key: "total_marks", label: "Total Marks", required: false },
-    { key: "percentage", label: "Percentage", required: false },
-    { key: "grade", label: "Grade", required: false },
-    { key: "remarks", label: "Remarks", required: false },
+  fields: [
+    {
+      key: "student_name",
+      label: "Student Name",
+      required: true,
+      matchHeaders: [
+        "Student's Full Name (In capital)",
+        "Student's Full Name",
+        "Student Full Name",
+        "Student Name",
+        "student_name",
+        "Name",
+        "Full Name",
+      ],
+    },
+    {
+      key: "total_correct",
+      label: "Total Correct Answer",
+      required: false,
+      matchHeaders: [
+        "Total Correct Answer",
+        "Correct Answer",
+        "Correct",
+        "total_correct",
+      ],
+    },
+    {
+      key: "total_incorrect",
+      label: "Total Incorrect Answer",
+      required: false,
+      matchHeaders: [
+        "Total Incorrect Answer",
+        "Incorrect Answer",
+        "Incorrect",
+        "total_incorrect",
+      ],
+    },
+    {
+      key: "not_attempted",
+      label: "Not Attempted Question",
+      required: false,
+      matchHeaders: [
+        "Not Attempted Question",
+        "Not Attempted",
+        "not_attempted",
+      ],
+    },
+    {
+      key: "rank",
+      label: "Rank",
+      required: false,
+      matchHeaders: ["Rank", "rank"],
+    },
+    {
+      key: "physics",
+      label: "Physics",
+      required: false,
+      matchHeaders: ["Physics", "physics"],
+    },
+    {
+      key: "chemistry",
+      label: "Chemistry",
+      required: false,
+      matchHeaders: ["Chemistry", "chemistry"],
+    },
+    {
+      key: "maths_biology",
+      label: "Maths / Biology",
+      required: false,
+      matchHeaders: [
+        "Maths / Biology",
+        "Maths/Biology",
+        "Maths",
+        "Biology",
+        "maths_biology",
+      ],
+    },
+    {
+      key: "total",
+      label: "Total",
+      required: false,
+      matchHeaders: ["Total", "total", "Total Marks"],
+    },
+    {
+      key: "date",
+      label: "Date",
+      required: false,
+      matchHeaders: ["Date", "date", "Result Date"],
+    },
   ],
-  hasSubjectColumns: true,
-  generateHTML: (data, mapping, subjectColumns) =>
-    generateResultHTML(data, mapping, subjectColumns),
+  generateHTML: (data, mapping, index, logoUrl) =>
+    generateResultHTML(data, mapping, index, logoUrl),
   filenamePrefix: "Result",
 };
 

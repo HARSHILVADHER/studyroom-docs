@@ -2,14 +2,14 @@ import { useState, useCallback } from "react";
 import { ArrowLeft, Loader2, Download, CheckCircle, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { GeneratorConfig, ValidationError } from "@/lib/types";
+import { GeneratorConfig, ValidationError, autoMapFields } from "@/lib/types";
 import { parseExcelFile } from "@/lib/excel-parser";
 import { generatePDFFromHTML, downloadBlob, generateBulkZip } from "@/lib/pdf-generator";
 import FileUpload from "./FileUpload";
 import DataPreview from "./DataPreview";
-import ColumnMapper from "./ColumnMapper";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import logo from "@/assets/logo.jpeg";
 
 interface GeneratorFlowProps {
   config: GeneratorConfig;
@@ -23,7 +23,6 @@ export default function GeneratorFlow({ config }: GeneratorFlowProps) {
   const [headers, setHeaders] = useState<string[]>([]);
   const [data, setData] = useState<Record<string, string>[]>([]);
   const [mapping, setMapping] = useState<Record<string, string>>({});
-  const [subjectColumns, setSubjectColumns] = useState<string[]>([]);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCount, setGeneratedCount] = useState(0);
@@ -38,23 +37,9 @@ export default function GeneratorFlow({ config }: GeneratorFlowProps) {
         setHeaders(h);
         setData(d);
 
-        // Auto-map columns by matching header names
-        const autoMapping: Record<string, string> = {};
-        for (const col of config.columns) {
-          const normalizedKey = col.key.toLowerCase().replace(/[_\s]/g, "");
-          const match = h.find(
-            (header) => header.toLowerCase().replace(/[_\s]/g, "") === normalizedKey
-          );
-          if (match) autoMapping[col.key] = match;
-        }
+        // Auto-map columns using field definitions
+        const autoMapping = autoMapFields(h, config.fields);
         setMapping(autoMapping);
-
-        // Auto-detect subject columns for results
-        if (config.hasSubjectColumns) {
-          const mappedValues = new Set(Object.values(autoMapping));
-          const possibleSubjects = h.filter((header) => !mappedValues.has(header));
-          setSubjectColumns(possibleSubjects);
-        }
 
         setStep("preview");
         toast.success(`Loaded ${d.length} student records`);
@@ -70,15 +55,13 @@ export default function GeneratorFlow({ config }: GeneratorFlowProps) {
     setHeaders([]);
     setData([]);
     setMapping({});
-    setSubjectColumns([]);
     setErrors([]);
     setStep("upload");
   };
 
   const validateData = (): ValidationError[] => {
     const errs: ValidationError[] = [];
-    const requiredFields = config.columns.filter((c) => c.required);
-    const rollNos = new Map<string, number>();
+    const requiredFields = config.fields.filter((c) => c.required);
 
     data.forEach((row, i) => {
       requiredFields.forEach((field) => {
@@ -91,27 +74,13 @@ export default function GeneratorFlow({ config }: GeneratorFlowProps) {
           });
         }
       });
-
-      const rollCol = mapping["roll_no"];
-      if (rollCol && row[rollCol]) {
-        const roll = row[rollCol].trim();
-        if (rollNos.has(roll)) {
-          errs.push({
-            row: i + 1,
-            field: "Roll No",
-            message: `Duplicate roll number: ${roll} (also in row ${rollNos.get(roll)})`,
-          });
-        } else {
-          rollNos.set(roll, i + 1);
-        }
-      }
     });
 
     return errs;
   };
 
   const isReadyToGenerate = () => {
-    const requiredFields = config.columns.filter((c) => c.required);
+    const requiredFields = config.fields.filter((c) => c.required);
     return requiredFields.every((f) => mapping[f.key]);
   };
 
@@ -119,7 +88,7 @@ export default function GeneratorFlow({ config }: GeneratorFlowProps) {
     const validationErrors = validateData();
     setErrors(validationErrors);
 
-    const requiredFields = config.columns.filter((c) => c.required);
+    const requiredFields = config.fields.filter((c) => c.required);
     const criticalErrorRows = new Set(
       validationErrors
         .filter((e) => requiredFields.some((f) => f.label === e.field))
@@ -137,14 +106,14 @@ export default function GeneratorFlow({ config }: GeneratorFlowProps) {
         if (criticalErrorRows.has(i + 1)) continue;
 
         const row = data[i];
-        const html = config.generateHTML(row, mapping, subjectColumns);
+        const html = config.generateHTML(row, mapping, i, logo);
         htmls.push(html);
 
         const blob = await generatePDFFromHTML(html);
-        const rollNo = row[mapping["roll_no"]] || String(i + 1);
-        const name = row[mapping["student_name"]] || "Student";
-        const cleanName = name.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_");
-        const filename = `${config.filenamePrefix}_${rollNo}_${cleanName}.pdf`;
+        const seatNo = `2026${String(i + 1).padStart(2, '0')}`;
+        const name = (row[mapping["student_name"]] || "Student").toUpperCase();
+        const cleanName = name.replace(/[^A-Z0-9\s]/g, "").replace(/\s+/g, "_");
+        const filename = `${config.filenamePrefix}_${seatNo}_${cleanName}.pdf`;
         blobs.push({ blob, filename });
 
         setGeneratedCount(blobs.length);
@@ -182,7 +151,6 @@ export default function GeneratorFlow({ config }: GeneratorFlowProps) {
     setHeaders([]);
     setData([]);
     setMapping({});
-    setSubjectColumns([]);
     setErrors([]);
     setPreviewHTMLs([]);
     setGeneratedBlobs([]);
@@ -192,11 +160,16 @@ export default function GeneratorFlow({ config }: GeneratorFlowProps) {
 
   const steps: { key: Step; label: string }[] = [
     { key: "upload", label: "Upload" },
-    { key: "preview", label: "Preview & Map" },
+    { key: "preview", label: "Preview" },
     { key: "results", label: "Download" },
   ];
 
   const currentStepIndex = steps.findIndex((s) => s.key === step);
+
+  // Check which fields were not auto-mapped
+  const unmappedRequired = config.fields.filter(
+    (f) => f.required && !mapping[f.key]
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -253,20 +226,46 @@ export default function GeneratorFlow({ config }: GeneratorFlowProps) {
           </div>
         )}
 
-        {/* Preview & Map step */}
+        {/* Preview step */}
         {step === "preview" && (
           <div className="space-y-6 animate-fade-in">
             <DataPreview headers={headers} data={data} />
 
-            <ColumnMapper
-              excelHeaders={headers}
-              columns={config.columns}
-              mapping={mapping}
-              onMappingChange={setMapping}
-              hasSubjectColumns={config.hasSubjectColumns}
-              subjectColumns={subjectColumns}
-              onSubjectColumnsChange={setSubjectColumns}
-            />
+            {/* Auto-mapping status */}
+            <div className="border border-border rounded-xl p-4 bg-card">
+              <h3 className="font-semibold text-foreground mb-3">Auto-Detected Columns</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {config.fields.map((field) => (
+                  <div key={field.key} className="flex items-center gap-2 text-sm">
+                    {mapping[field.key] ? (
+                      <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                    ) : (
+                      <AlertCircle className={`w-4 h-4 shrink-0 ${field.required ? 'text-destructive' : 'text-muted-foreground'}`} />
+                    )}
+                    <span className="font-medium text-foreground">{field.label}:</span>
+                    <span className={mapping[field.key] ? "text-muted-foreground" : "text-destructive"}>
+                      {mapping[field.key] || (field.required ? "Not found!" : "Not found")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {unmappedRequired.length > 0 && (
+              <div className="border border-destructive/30 rounded-xl p-4 bg-destructive/5">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="w-5 h-5 text-destructive" />
+                  <h3 className="font-semibold text-destructive">
+                    Missing Required Columns
+                  </h3>
+                </div>
+                <p className="text-sm text-destructive/80">
+                  The following required columns were not found in your Excel file:{" "}
+                  {unmappedRequired.map((f) => f.label).join(", ")}. 
+                  Please check that your file has the correct column headers.
+                </p>
+              </div>
+            )}
 
             {errors.length > 0 && (
               <div className="border border-destructive/30 rounded-xl p-4 bg-destructive/5">
@@ -329,22 +328,6 @@ export default function GeneratorFlow({ config }: GeneratorFlowProps) {
                   <h2 className="text-xl font-bold text-foreground">Generation Complete</h2>
                   <p className="text-muted-foreground text-sm">
                     Generated {generatedBlobs.length} cards
-                    {errors.filter((e) =>
-                      config.columns
-                        .filter((c) => c.required)
-                        .some((c) => c.label === e.field)
-                    ).length > 0 &&
-                      ` • ${
-                        new Set(
-                          errors
-                            .filter((e) =>
-                              config.columns
-                                .filter((c) => c.required)
-                                .some((c) => c.label === e.field)
-                            )
-                            .map((e) => e.row)
-                        ).size
-                      } rows skipped due to errors`}
                   </p>
                 </div>
               </div>
