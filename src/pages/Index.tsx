@@ -26,7 +26,7 @@ const Index = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-xl mx-auto">
             <Link to="/admit-card" className="group">
-              <div className="bg-card border-2 border-border rounded-2xl p-8 hover:border-primary hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1">
+              <div className="bg-card border-2 border-border rounded-2xl p-8 hover:border-primary hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center justify-center">
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5 group-hover:bg-primary transition-colors duration-300">
                   <FileText className="w-8 h-8 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
                 </div>
@@ -40,7 +40,7 @@ const Index = () => {
             </Link>
 
             <Link to="/result" className="group">
-              <div className="bg-card border-2 border-border rounded-2xl p-8 hover:border-primary hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1">
+              <div className="bg-card border-2 border-border rounded-2xl p-8 hover:border-primary hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center justify-center">
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-5 group-hover:bg-primary transition-colors duration-300">
                   <Award className="w-8 h-8 text-primary group-hover:text-primary-foreground transition-colors duration-300" />
                 </div>
