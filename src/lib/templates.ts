@@ -26,8 +26,8 @@ export function generateAdmitCardHTML(
   const seatNo = seatNumber(index);
 
   return `
-    <div style="width:750px; padding:0; font-family:Arial,Helvetica,sans-serif; border:3px solid #000; background:#fff; box-sizing:border-box;">
-      <div style="padding:24px 28px 0 28px;">
+    <div style="width:750px; margin:20px auto; padding:0; font-family:Arial,Helvetica,sans-serif; border:3px solid #000; background:#fff; box-sizing:border-box; min-height:calc(100% - 40px);">
+      <div style="padding:24px 28px 24px 28px;">
       <!-- Header -->
       <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:14px;">
         <div>
@@ -129,8 +129,8 @@ export function generateResultHTML(
   const divider = `<div style="text-align:center; padding:14px 0; font-size:16px; color:#555; letter-spacing:2px;">♦———♦—◇◆◇—♦———♦</div>`;
 
   return `
-    <div style="width:750px; padding:0; font-family:Arial,Helvetica,sans-serif; border:3px solid #000; background:#fff; box-sizing:border-box;">
-      <div style="padding:24px 28px 0 28px;">
+    <div style="width:750px; margin:20px auto; padding:0; font-family:Arial,Helvetica,sans-serif; border:3px solid #000; background:#fff; box-sizing:border-box; min-height:calc(100% - 40px);">
+      <div style="padding:24px 28px 24px 28px;">
       <!-- Header centered -->
       <div style="text-align:center; padding-bottom:8px;">
         <img src="${logoUrl}" style="height:80px; display:inline-block;" crossorigin="anonymous" />
