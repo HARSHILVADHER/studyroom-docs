@@ -37,6 +37,22 @@ export async function generatePDFFromHTML(html: string): Promise<Blob> {
       Math.min(imgHeight, pageHeight - margin * 2)
     );
 
+    // Find all <a> tags in the rendered HTML and add clickable link annotations
+    const links = container.querySelectorAll('a[href]');
+    const scale = imgWidth / 750; // ratio from HTML px to PDF mm
+    links.forEach((link) => {
+      const rect = link.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const x = margin + (rect.left - containerRect.left) * scale;
+      const y = margin + (rect.top - containerRect.top) * scale;
+      const w = rect.width * scale;
+      const h = rect.height * scale;
+      const href = link.getAttribute('href');
+      if (href) {
+        pdf.link(x, y, w, h, { url: href });
+      }
+    });
+
     return pdf.output('blob');
   } finally {
     document.body.removeChild(container);
