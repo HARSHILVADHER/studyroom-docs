@@ -9,10 +9,29 @@ export async function generatePDFFromHTML(html: string): Promise<Blob> {
   container.style.top = '0';
   container.style.zIndex = '-9999';
   container.style.backgroundColor = '#ffffff';
+  container.style.width = '750px';
   container.innerHTML = html;
   document.body.appendChild(container);
 
   try {
+    // Collect link positions BEFORE html2canvas (which may alter layout)
+    const linkAnnotations: { x: number; y: number; w: number; h: number; url: string }[] = [];
+    const containerRect = container.getBoundingClientRect();
+    const links = container.querySelectorAll('a[href]');
+    links.forEach((link) => {
+      const rect = link.getBoundingClientRect();
+      const href = link.getAttribute('href');
+      if (href) {
+        linkAnnotations.push({
+          x: rect.left - containerRect.left,
+          y: rect.top - containerRect.top,
+          w: rect.width,
+          h: rect.height,
+          url: href,
+        });
+      }
+    });
+
     const canvas = await html2canvas(container, {
       scale: 2,
       useCORS: true,
@@ -37,20 +56,16 @@ export async function generatePDFFromHTML(html: string): Promise<Blob> {
       Math.min(imgHeight, pageHeight - margin * 2)
     );
 
-    // Find all <a> tags in the rendered HTML and add clickable link annotations
-    const links = container.querySelectorAll('a[href]');
-    const scale = imgWidth / 750; // ratio from HTML px to PDF mm
-    links.forEach((link) => {
-      const rect = link.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-      const x = margin + (rect.left - containerRect.left) * scale;
-      const y = margin + (rect.top - containerRect.top) * scale;
-      const w = rect.width * scale;
-      const h = rect.height * scale;
-      const href = link.getAttribute('href');
-      if (href) {
-        pdf.link(x, y, w, h, { url: href });
-      }
+    // Convert pixel positions to PDF mm coordinates and add clickable link areas
+    const pxToMm = imgWidth / 750;
+    linkAnnotations.forEach(({ x, y, w, h, url }) => {
+      pdf.link(
+        margin + x * pxToMm,
+        margin + y * pxToMm,
+        w * pxToMm,
+        h * pxToMm,
+        { url }
+      );
     });
 
     return pdf.output('blob');
