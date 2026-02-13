@@ -80,7 +80,7 @@ export function generateAdmitCardHTML(
           <td colspan="2" style="padding:10px 14px; border:1.5px solid #000; font-size:14px;">
             <div style="font-weight:700; margin-bottom:6px;">EXAMINATION CENTER :</div>
             <ul style="margin:0; padding-left:22px;">
-              <li style="font-size:13px;">STUDYROOM CLASSES, Near Akshar School, Gopal Chowk, Paradise Hall Road, Rajkot-360005. <span style="text-decoration:underline; color:#0066cc;">CLICK HERE FOR MAP</span></li>
+              <li style="font-size:13px;">STUDYROOM CLASSES, Near Akshar School, Gopal Chowk, Paradise Hall Road, Rajkot-360005. <a href="https://maps.app.goo.gl/DeWoszsMxvRPypbm6" style="text-decoration:underline; color:#0066cc;">CLICK HERE FOR MAP</a></li>
             </ul>
           </td>
         </tr>
