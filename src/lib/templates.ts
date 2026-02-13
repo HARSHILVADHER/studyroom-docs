@@ -73,7 +73,7 @@ export function generateAdmitCardHTML(
         </tr>
         <tr>
           <td colspan="2" style="padding:10px 14px; border:1.5px solid #000; font-size:14px; font-weight:700;">
-            EXAM TIMING : 10:00 AM TO 01:00 PM
+            EXAM TIMING : 10:00 AM TO 12:20 PM
           </td>
         </tr>
         <tr>
