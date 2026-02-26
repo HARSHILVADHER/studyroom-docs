@@ -119,7 +119,7 @@ export function generateResultHTML(
 ): string {
   const get = (field: string) => upper(data[mapping[field]] || '');
   const seatNo = seatNumber(index);
-  const date = data[mapping['date']] ? upper(data[mapping['date']]) : '';
+  const date = '01-03-2026';
 
   const physics = data[mapping['physics']] || '—';
   const chemistry = data[mapping['chemistry']] || '—';
