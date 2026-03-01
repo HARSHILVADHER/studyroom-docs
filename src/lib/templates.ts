@@ -118,7 +118,7 @@ export function generateResultHTML(
   logoUrl: string
 ): string {
   const get = (field: string) => upper(data[mapping[field]] || '');
-  const seatNo = seatNumber(index);
+  const seatNo = data[mapping['seat_no']] ? upper(data[mapping['seat_no']]) : seatNumber(index);
   const date = '01-03-2026';
 
   const physics = data[mapping['physics']] || '—';
