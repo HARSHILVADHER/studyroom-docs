@@ -21,6 +21,17 @@ const resultConfig: GeneratorConfig = {
       ],
     },
     {
+      key: "seat_no",
+      label: "Seat No",
+      required: false,
+      matchHeaders: [
+        "Seat No",
+        "Seat Number",
+        "seat_no",
+        "SEAT NO",
+      ],
+    },
+    {
       key: "total_correct",
       label: "Total Correct Answer",
       required: false,
